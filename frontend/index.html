@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <style>html,body{overflow-x:hidden;width:100%}</style>
+    <title>XAIO Website</title>
+    <meta name="description" content="Website generated with XAIO" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <!-- XAIO Runtime: Screenshot capture & Design Mode (loaded from dev-server/runner) -->
+    <script>
+      // Load XAIO runtime from dev-server (local) or runner (cloud)
+      (function() {
+        var baseUrl = globalThis.__XAIO_API_URL__ || 'http://localhost:8001';
+        var script = document.createElement('script');
+        script.src = baseUrl + '/static/design-mode-runtime.js';
+        script.onerror = function() {
+          console.log('[XAIO] Runtime not available at', baseUrl);
+        };
+        document.body.appendChild(script);
+      })();
+    </script>
+  </body>
+</html>
