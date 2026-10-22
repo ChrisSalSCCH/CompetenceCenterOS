@@ -1,20 +1,115 @@
-/* App.css - Global component styles */
+/* CircleOS theme: warm paper, ink, terracotta. Overrides the shadcn tokens from index.css. */
 
-/* Root app container */
+:root {
+  --font-display: 'Newsreader', Georgia, serif;
+  --font-body: 'Instrument Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --background: 40 36% 93%;
+  --foreground: 228 24% 15%;
+  --card: 42 62% 98%;
+  --card-foreground: 228 24% 15%;
+  --popover: 42 62% 98%;
+  --popover-foreground: 228 24% 15%;
+  --primary: 16 63% 46%;
+  --primary-foreground: 40 60% 97%;
+  --secondary: 40 28% 89%;
+  --secondary-foreground: 228 24% 18%;
+  --muted: 40 26% 90%;
+  --muted-foreground: 32 10% 38%;
+  --accent: 38 42% 87%;
+  --accent-foreground: 228 24% 15%;
+  --destructive: 2 62% 46%;
+  --destructive-foreground: 40 60% 97%;
+  --border: 38 22% 83%;
+  --input: 38 22% 80%;
+  --ring: 16 63% 46%;
+  --radius: 0.9rem;
+
+  --forest: 160 52% 24%;
+  --ochre: 40 82% 36%;
+  --ink: 228 24% 15%;
+  --heading-color: hsl(var(--foreground));
+
+  --chart-1: 16 63% 46%;
+  --chart-2: 160 52% 30%;
+  --chart-3: 40 82% 44%;
+  --chart-4: 218 44% 38%;
+  --chart-5: 330 30% 40%;
+
+  --sidebar-background: 228 26% 13%;
+  --sidebar-foreground: 40 26% 88%;
+  --sidebar-primary: 16 63% 52%;
+  --sidebar-primary-foreground: 40 60% 97%;
+  --sidebar-accent: 228 20% 21%;
+  --sidebar-accent-foreground: 40 40% 96%;
+  --sidebar-border: 228 18% 22%;
+  --sidebar-ring: 16 63% 52%;
+}
+
+.dark {
+  --background: 228 22% 9%;
+  --foreground: 40 28% 92%;
+  --card: 228 20% 12%;
+  --card-foreground: 40 28% 92%;
+  --popover: 228 20% 12%;
+  --popover-foreground: 40 28% 92%;
+  --primary: 16 70% 58%;
+  --primary-foreground: 228 30% 8%;
+  --secondary: 228 16% 18%;
+  --secondary-foreground: 40 28% 92%;
+  --muted: 228 16% 16%;
+  --muted-foreground: 36 14% 66%;
+  --accent: 228 16% 20%;
+  --accent-foreground: 40 28% 92%;
+  --destructive: 2 66% 56%;
+  --destructive-foreground: 40 60% 97%;
+  --border: 228 14% 21%;
+  --input: 228 14% 24%;
+  --ring: 16 70% 58%;
+  --forest: 160 45% 50%;
+  --ochre: 40 78% 58%;
+  --ink: 40 28% 92%;
+
+  --sidebar-background: 228 26% 7%;
+  --sidebar-border: 228 18% 15%;
+}
+
+html,
+body,
 #root {
   min-height: 100vh;
 }
 
-/* Custom animations */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+body {
+  font-family: var(--font-body);
+  background-color: hsl(var(--background));
+  background-image:
+    radial-gradient(900px 420px at 88% -8%, hsl(16 63% 46% / 0.09), transparent 62%),
+    radial-gradient(700px 380px at 0% 105%, hsl(160 52% 24% / 0.07), transparent 60%),
+    linear-gradient(hsl(var(--border) / 0.28) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--border) / 0.28) 1px, transparent 1px);
+  background-size: auto, auto, 34px 34px, 34px 34px;
+  background-attachment: fixed;
 }
 
-@keyframes slideUp {
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+.font-mono-label {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Staggered page-load reveal */
+@keyframes reveal {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
@@ -22,107 +117,60 @@
   }
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+.reveal {
+  animation: reveal 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
 }
 
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease-out;
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-.animate-slideUp {
-  animation: slideUp 0.4s ease-out;
+.pop-in {
+  animation: pop 0.25s ease-out both;
 }
 
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+.paper-card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  box-shadow: 0 1px 0 hsl(var(--background)) inset, 0 8px 24px -16px hsl(228 30% 20% / 0.28);
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 }
 
-/* Card hover effects */
-.card-hover {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card-hover:hover {
+.paper-card.interactive:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  border-color: hsl(var(--primary) / 0.45);
+  box-shadow: 0 14px 30px -18px hsl(16 63% 30% / 0.45);
 }
 
-/* Gradient backgrounds */
-.bg-gradient-primary {
-  background: linear-gradient(135deg, var(--tw-gradient-from, #3b82f6), var(--tw-gradient-to, #8b5cf6));
+.stripe-primary {
+  background-image: repeating-linear-gradient(135deg, hsl(var(--primary) / 0.12) 0 6px, transparent 6px 12px);
 }
 
-.bg-gradient-secondary {
-  background: linear-gradient(135deg, var(--tw-gradient-from, #10b981), var(--tw-gradient-to, #14b8a6));
+.map-circle {
+  transition: fill-opacity 0.2s ease, stroke-width 0.2s ease;
+  cursor: pointer;
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.map-circle:hover {
+  stroke-width: 2.5;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f5f9;
-  border-radius: 4px;
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .pop-in {
+    animation: none;
+  }
 }
 
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* Focus ring utilities */
-.focus-ring:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-}
-
-/* Transition utilities */
-.transition-default {
-  transition: all 0.2s ease;
-}
-
-.transition-slow {
-  transition: all 0.3s ease;
-}
-
-/* Text truncation */
-.truncate-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.truncate-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Glass morphism effect */
-.glass {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-/* Loading skeleton */
-.skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: skeleton-loading 1.5s infinite;
-}
-
-@keyframes skeleton-loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+::selection {
+  background: hsl(var(--primary) / 0.25);
 }

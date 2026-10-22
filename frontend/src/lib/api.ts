@@ -72,6 +72,53 @@ export const api = axios.create({
   },
 })
 
+// ---------------------------------------------------------------------------
+// Session tokens (JWT access + refresh). The data itself lives in the database;
+// only the credentials of the current browser session are kept here.
+// ---------------------------------------------------------------------------
+const ACCESS_KEY = 'circleos.access'
+const REFRESH_KEY = 'circleos.refresh'
+
+export function getAccessToken(): string | null {
+  return localStorage.getItem(ACCESS_KEY)
+}
+
+export function setTokens(access: string, refresh: string): void {
+  localStorage.setItem(ACCESS_KEY, access)
+  localStorage.setItem(REFRESH_KEY, refresh)
+}
+
+export function clearTokens(): void {
+  localStorage.removeItem(ACCESS_KEY)
+  localStorage.removeItem(REFRESH_KEY)
+}
+
+let refreshing: Promise<string | null> | null = null
+
+async function refreshAccessToken(): Promise<string | null> {
+  const refresh = localStorage.getItem(REFRESH_KEY)
+  if (!refresh) return null
+  try {
+    const res = await axios.post<{ access_token: string; refresh_token: string }>(
+      `${API_BASE_URL}/auth/refresh`,
+      { refresh_token: refresh },
+    )
+    setTokens(res.data.access_token, res.data.refresh_token)
+    return res.data.access_token
+  } catch {
+    clearTokens()
+    return null
+  }
+}
+
+api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  const token = getAccessToken()
+  if (token && config.headers && !config.headers.get('Authorization')) {
+    config.headers.set('Authorization', `Bearer ${token}`)
+  }
+  return config
+})
+
 // Request interceptor — attach a fresh X-Request-ID for end-to-end tracing.
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (config.headers && !config.headers.get('X-Request-ID')) {
@@ -90,7 +137,24 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 // caller can still handle it with try/catch.
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
-  (error: AxiosError) => {
+  async (error: AxiosError) => {
+    const original = error.config as (InternalAxiosRequestConfig & { _retried?: boolean }) | undefined
+    if (
+      error.response?.status === 401 &&
+      original &&
+      !original._retried &&
+      !(original.url ?? '').includes('/auth/')
+    ) {
+      original._retried = true
+      refreshing = refreshing ?? refreshAccessToken()
+      const token = await refreshing
+      refreshing = null
+      if (token) {
+        original.headers.set('Authorization', `Bearer ${token}`)
+        return api.request(original)
+      }
+      window.dispatchEvent(new Event('circleos:signed-out'))
+    }
     if (error.response) {
       const status = error.response.status
       const data = error.response.data as { error?: ApiErrorShape } | undefined

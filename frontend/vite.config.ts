@@ -33,7 +33,7 @@ export default defineConfig({
         manualChunks: {
           // Split vendor chunks
           'vendor-react': ['react', 'react-dom'],
-          'vendor-router': ['react-router-dom'],
+          'vendor-router': ['react-router'],
         },
         // Asset file naming with hash for caching
         assetFileNames: 'assets/[name]-[hash][extname]',
@@ -61,7 +61,8 @@ export default defineConfig({
       // core
       'react',
       'react-dom',
-      'react-router-dom',
+      'react-router',
+      'd3-hierarchy',
       // shadcn primitives
       '@radix-ui/react-accordion',
       '@radix-ui/react-alert-dialog',
