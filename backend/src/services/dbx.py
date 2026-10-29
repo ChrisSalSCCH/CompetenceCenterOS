@@ -28,7 +28,7 @@ def _decode_json(row: Row) -> Row:
     return row
 
 
-JSON_COLUMNS = ("changes", "people", "before_state", "after_state", "notification_prefs", "data")
+JSON_COLUMNS = ("changes", "people", "before_state", "after_state", "notification_prefs", "data", "snapshot")
 
 
 async def q(db: AsyncSession, sql: str, **params: Any) -> list[Row]:

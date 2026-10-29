@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import {
-  Bell, Briefcase, Building2, CalendarDays, ChevronDown, Languages, LayoutDashboard, LogOut, Menu, Moon, Network, Scale, Search, Settings2, Sparkles, Sun, Target, UserCircle2, Users, KanbanSquare,
+  Bell, Briefcase, Building2, CalendarDays, ChevronDown, Languages, LayoutDashboard, Handshake, LogOut, Menu, Moon, Network, Scale, Search, Settings2, Sparkles, Sun, Target, UserCircle2, Users, KanbanSquare,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
@@ -73,10 +73,19 @@ const NAV: NavDef[] = [
       { to: '/crm', label: 'Dashboard', end: true },
       { to: '/crm/organizations', label: 'Companies' },
       { to: '/crm/contacts', label: 'Contacts' },
-      { to: '/crm/opportunities', label: 'Opportunities', planned: true },
-      { to: '/crm/quotes', label: 'Quotes', planned: true },
-      { to: '/crm/contracts', label: 'NDAs & Contracts', planned: true },
       { to: '/crm/relationships', label: 'Customer Relationships' },
+    ],
+  },
+  {
+    to: '/sales',
+    label: 'Sales',
+    icon: Handshake,
+    children: [
+      { to: '/sales', label: 'Pipeline', end: true },
+      { to: '/sales/proposals', label: 'Proposals' },
+      { to: '/sales/ndas', label: 'NDAs' },
+      { to: '/sales/contracts', label: 'Contracts' },
+      { to: '/sales/settings', label: 'Sales settings' },
     ],
   },
   { to: '/goals', label: 'Goals & Metrics', icon: Target },

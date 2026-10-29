@@ -4,10 +4,11 @@ import { fmtDateTime, useGet } from '@/lib/hooks'
 import { useT } from '@/lib/i18n'
 import type { CrmDashboard as CrmDashboardData } from '@/lib/portfolio-types'
 
-const PLANNED = [
-  { to: '/crm/opportunities', label: 'Opportunities', hint: 'Pipeline with stages, values and forecast' },
-  { to: '/crm/quotes', label: 'Quotes', hint: 'Quotes with line items, versions and approvals' },
-  { to: '/crm/contracts', label: 'NDAs & Contracts', hint: 'NDAs and contracts with validity dates and reminders' },
+const SALES_LINKS = [
+  { to: '/sales', label: 'Pipeline' },
+  { to: '/sales/proposals', label: 'Proposals' },
+  { to: '/sales/ndas', label: 'NDAs' },
+  { to: '/sales/contracts', label: 'Contracts' },
 ]
 
 export default function CrmDashboard() {
@@ -52,12 +53,12 @@ export default function CrmDashboard() {
               </ul>
             )}
           </Section>
-          <Section title={t('Coming in a later phase')} index={3}>
+          <Section title={t('Sales')} index={3}>
             <ul className="space-y-2">
-              {PLANNED.map((p) => (
+              {SALES_LINKS.map((p) => (
                 <li key={p.to}>
-                  <Link to={p.to} className="flex items-center justify-between gap-2 rounded-lg border border-dashed p-2 text-sm hover:border-primary">
-                    <span>{t(p.label)}</span><Pill tone="ochre">{t('Planned')}</Pill>
+                  <Link to={p.to} className="flex items-center justify-between gap-2 rounded-lg border p-2 text-sm hover:border-primary">
+                    <span>{t(p.label)}</span>
                   </Link>
                 </li>
               ))}

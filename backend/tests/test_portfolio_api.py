@@ -105,7 +105,7 @@ def test_portfolio_catalog_and_crm_rules():
             assert view["projects"] and view["contacts"] and view["activities"] and view["roles"], "360 view is populated"
             assert view["next_steps"], "open follow-up task appears as next step"
             dash = client.get("/api/crm/dashboard", headers=admin).json()
-            assert dash["active_customers"] >= 3 and dash["planned_modules"] == ["opportunities", "quotes", "nda_contracts"]
+            assert dash["active_customers"] >= 3 and dash["planned_modules"] == []
 
             # ---- references expose only released content
             refs = client.get("/api/portfolio/references", headers=member).json()

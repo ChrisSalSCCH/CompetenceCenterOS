@@ -37,7 +37,13 @@ import CrmOrganizations from '@/pages/crm/CrmOrganizations'
 import CrmOrganizationDetail from '@/pages/crm/CrmOrganizationDetail'
 import CrmContacts from '@/pages/crm/CrmContacts'
 import CrmRelationships from '@/pages/crm/CrmRelationships'
-import CrmPlanned from '@/pages/crm/CrmPlanned'
+import SalesPipeline from '@/pages/sales/SalesPipeline'
+import OpportunityDetail from '@/pages/sales/OpportunityDetail'
+import ProposalsList from '@/pages/sales/ProposalsList'
+import ProposalDetail from '@/pages/sales/ProposalDetail'
+import { NdaDetail, NdaList } from '@/pages/sales/NdaPages'
+import { ContractDetail, ContractList } from '@/pages/sales/ContractPages'
+import SalesSettings from '@/pages/sales/SalesSettings'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -86,9 +92,18 @@ function Gate() {
         <Route path="crm/organizations/:id" element={<CrmOrganizationDetail />} />
         <Route path="crm/contacts" element={<CrmContacts />} />
         <Route path="crm/relationships" element={<CrmRelationships />} />
-        <Route path="crm/opportunities" element={<CrmPlanned module="opportunities" />} />
-        <Route path="crm/quotes" element={<CrmPlanned module="quotes" />} />
-        <Route path="crm/contracts" element={<CrmPlanned module="contracts" />} />
+        <Route path="crm/opportunities" element={<Navigate to="/sales" replace />} />
+        <Route path="crm/quotes" element={<Navigate to="/sales/proposals" replace />} />
+        <Route path="crm/contracts" element={<Navigate to="/sales/contracts" replace />} />
+        <Route path="sales" element={<SalesPipeline />} />
+        <Route path="sales/opportunities/:id" element={<OpportunityDetail />} />
+        <Route path="sales/proposals" element={<ProposalsList />} />
+        <Route path="sales/proposals/:id" element={<ProposalDetail />} />
+        <Route path="sales/ndas" element={<NdaList />} />
+        <Route path="sales/ndas/:id" element={<NdaDetail />} />
+        <Route path="sales/contracts" element={<ContractList />} />
+        <Route path="sales/contracts/:id" element={<ContractDetail />} />
+        <Route path="sales/settings" element={<SalesSettings />} />
         <Route path="goals" element={<Goals />} />
         <Route path="assistant" element={<Assistant />} />
         <Route path="admin" element={<Admin />} />

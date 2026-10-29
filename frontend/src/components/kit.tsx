@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react'
-import { AlertTriangle, Inbox, Sparkles } from 'lucide-react'
+import { AlertTriangle, Inbox, Info, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useT } from '@/lib/i18n'
 import { initials } from '@/lib/hooks'
@@ -144,6 +144,15 @@ export function PlannedNotice({ children }: Readonly<{ children: ReactNode }>) {
         <span className="font-semibold">{t('Planned')}: </span>
         {children}
       </div>
+    </div>
+  )
+}
+
+export function InfoNotice({ children }: Readonly<{ children: ReactNode }>) {
+  return (
+    <div role="note" className="flex items-start gap-2 rounded-xl border bg-muted/40 p-3 text-sm">
+      <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+      <div>{children}</div>
     </div>
   )
 }

@@ -22,12 +22,12 @@ router = APIRouter(prefix="/api/crm", tags=["crm"])
 RelationType = Literal["customer", "prospect", "partner", "research_partner", "funder", "supplier", "competitor", "other"]
 SizeClass = Literal["micro", "small", "medium", "large", "public"]
 ActiveState = Literal["active", "inactive"]
-ActivityKind = Literal["call", "meeting", "email", "note", "visit", "other"]
+ActivityKind = Literal["call", "meeting", "email", "note", "visit", "workshop", "presentation", "negotiation", "other"]
 EMAIL_RE = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
 PHONE_RE = r"^[0-9+()\-./ ]{3,40}$"
 ORG_NOT_FOUND = "Organization not found."
 CONTACT_NOT_FOUND = "Contact not found."
-PLANNED_MODULES = ["opportunities", "quotes", "nda_contracts"]
+PLANNED_MODULES: list[str] = []  # opportunities, quotes, NDAs and contracts live in /api/commercial now
 
 
 class OrgCreate(BaseModel):
@@ -107,6 +107,8 @@ class ActivityCreate(BaseModel):
     crm_org_id: UUID | None = None
     contact_id: UUID | None = None
     project_id: UUID | None = None
+    opportunity_id: UUID | None = None
+    external_ref: str | None = Field(default=None, max_length=300)
     kind: ActivityKind = "note"
     subject: str = Field(min_length=2, max_length=200)
     body: str = Field(default="", max_length=10000)
@@ -114,11 +116,24 @@ class ActivityCreate(BaseModel):
     follow_up: FollowUp | None = None
 
 
+ScopeType = Literal["organization", "project", "opportunity", "proposal", "contract"]
+SCOPE_TABLES = {
+    "organization": ("crm_organizations", "CRM_ORG_NOT_FOUND", ORG_NOT_FOUND),
+    "project": ("projects", "PROJECT_NOT_FOUND", "Project not found."),
+    "opportunity": ("opportunities", "OPPORTUNITY_NOT_FOUND", "Opportunity not found."),
+    "proposal": ("proposals", "PROPOSAL_NOT_FOUND", "Proposal not found."),
+    "contract": ("contracts", "CONTRACT_NOT_FOUND", "Contract not found."),
+}
+
+
 class ScopeCreate(BaseModel):
     role_assignment_id: UUID
-    scope_type: Literal["organization", "project"]
+    scope_type: ScopeType
     crm_org_id: UUID | None = None
     project_id: UUID | None = None
+    opportunity_id: UUID | None = None
+    proposal_id: UUID | None = None
+    contract_id: UUID | None = None
 
 
 # ---------------------------------------------------------------- helpers
@@ -484,16 +499,18 @@ async def delete_contact(contact_id: UUID, ctx: CtxDep, db: DbDep) -> dict:
 
 
 @router.get("/activities", summary="Recent activities (optionally for one organization, contact or project)")
-async def list_activities(ctx: CtxDep, db: DbDep, crm_org_id: UUID | None = None, contact_id: UUID | None = None, project_id: UUID | None = None, limit: int = Query(default=30, ge=1, le=100)) -> list[dict]:
+async def list_activities(  # noqa: PLR0913 - one parameter per filter
+    ctx: CtxDep, db: DbDep, crm_org_id: UUID | None = None, contact_id: UUID | None = None, project_id: UUID | None = None, opportunity_id: UUID | None = None, limit: int = Query(default=30, ge=1, le=100)
+) -> list[dict]:
     where = ["a.organization_id = :o", "a.deleted_at IS NULL"]
     params: dict[str, Any] = {"o": ctx.org_id, "lim": limit}
-    for col, val in ("crm_org_id", crm_org_id), ("contact_id", contact_id), ("project_id", project_id):
+    for col, val in ("crm_org_id", crm_org_id), ("contact_id", contact_id), ("project_id", project_id), ("opportunity_id", opportunity_id):
         if val:
             where.append(f"a.{col} = :{col}")
             params[col] = val
     return await q(
         db,
-        f"""SELECT a.id, a.kind, a.subject, a.body, a.occurred_at, a.crm_org_id, co.name AS org_name, a.contact_id, a.project_id, a.follow_up_task_id, u.display_name AS author_name
+        f"""SELECT a.id, a.kind, a.subject, a.body, a.occurred_at, a.crm_org_id, co.name AS org_name, a.contact_id, a.project_id, a.opportunity_id, a.follow_up_task_id, u.display_name AS author_name
             FROM crm_activities a LEFT JOIN crm_organizations co ON co.id = a.crm_org_id LEFT JOIN users u ON u.id = a.created_by
             WHERE {' AND '.join(where)} ORDER BY a.occurred_at DESC LIMIT :lim""",  # noqa: S608 - constants only
         **params,
@@ -503,8 +520,14 @@ async def list_activities(ctx: CtxDep, db: DbDep, crm_org_id: UUID | None = None
 @router.post("/activities", summary="Log an activity and optionally create a follow-up task", responses={422: {"description": "Needs an organization, contact or project"}})
 async def create_activity(body: ActivityCreate, ctx: CtxDep, db: DbDep) -> dict:
     require_write(ctx)
-    if not (body.crm_org_id or body.contact_id or body.project_id):
-        raise err(422, "ACTIVITY_TARGET_REQUIRED", "Link the activity to an organization, a contact or a project.", "crm_org_id")
+    if not (body.crm_org_id or body.contact_id or body.project_id or body.opportunity_id):
+        raise err(422, "ACTIVITY_TARGET_REQUIRED", "Link the activity to an organization, a contact, a project or an opportunity.", "crm_org_id")
+    if body.opportunity_id:
+        opp = await q1(db, "SELECT crm_org_id FROM opportunities WHERE id = :i AND organization_id = :o AND deleted_at IS NULL", i=body.opportunity_id, o=ctx.org_id)
+        if opp is None:
+            raise err(404, "OPPORTUNITY_NOT_FOUND", "Opportunity not found.", "opportunity_id")
+        if body.crm_org_id is None:
+            body.crm_org_id = opp["crm_org_id"]
     if body.crm_org_id:
         await _org(db, ctx, body.crm_org_id)
     if body.contact_id:
@@ -528,9 +551,9 @@ async def create_activity(body: ActivityCreate, ctx: CtxDep, db: DbDep) -> dict:
         await notify(db, ctx.org_id, [assignee], "task", f"New task: {body.follow_up.title}", "", f"/work?task={task_id}", exclude=ctx.user_id)
     row = await q1(
         db,
-        """INSERT INTO crm_activities (organization_id, crm_org_id, contact_id, project_id, kind, subject, body, occurred_at, follow_up_task_id, created_by, updated_by)
-           VALUES (:o, :co, :c, :p, :k, :s, :b, COALESCE(:at, NOW()), :t, :u, :u) RETURNING id""",
-        o=ctx.org_id, co=body.crm_org_id, c=body.contact_id, p=body.project_id, k=body.kind, s=body.subject, b=body.body, at=body.occurred_at, t=task_id, u=ctx.user_id,
+        """INSERT INTO crm_activities (organization_id, crm_org_id, contact_id, project_id, opportunity_id, external_ref, kind, subject, body, occurred_at, follow_up_task_id, created_by, updated_by)
+           VALUES (:o, :co, :c, :p, :op, :er, :k, :s, :b, COALESCE(:at, NOW()), :t, :u, :u) RETURNING id""",
+        o=ctx.org_id, co=body.crm_org_id, c=body.contact_id, p=body.project_id, op=body.opportunity_id, er=body.external_ref, k=body.kind, s=body.subject, b=body.body, at=body.occurred_at, t=task_id, u=ctx.user_id,
     )
     await db.commit()
     return {"id": row["id"], "follow_up_task_id": task_id}
@@ -563,9 +586,12 @@ async def list_scopes(ctx: CtxDep, db: DbDep, role_id: UUID | None = None, crm_o
     return await q(
         db,
         f"""SELECT s.id, s.scope_type, s.crm_org_id, co.name AS org_name, s.project_id, p.name AS project_name, ra.id AS role_assignment_id,
+                   s.opportunity_id, op.title AS opportunity_title, s.proposal_id, pr.number AS proposal_number, s.contract_id, ct.number AS contract_number,
                    ra.role_id, r.name AS role_name, ra.user_id, u.display_name AS user_name
             FROM crm_role_scopes s JOIN role_assignments ra ON ra.id = s.role_assignment_id AND ra.deleted_at IS NULL JOIN roles r ON r.id = ra.role_id AND r.deleted_at IS NULL
             JOIN users u ON u.id = ra.user_id LEFT JOIN crm_organizations co ON co.id = s.crm_org_id AND co.deleted_at IS NULL LEFT JOIN projects p ON p.id = s.project_id AND p.deleted_at IS NULL
+            LEFT JOIN opportunities op ON op.id = s.opportunity_id AND op.deleted_at IS NULL LEFT JOIN proposals pr ON pr.id = s.proposal_id AND pr.deleted_at IS NULL
+            LEFT JOIN contracts ct ON ct.id = s.contract_id AND ct.deleted_at IS NULL
             WHERE {' AND '.join(where)} ORDER BY r.name, u.display_name""",  # noqa: S608 - constants only
         **params,
     )
@@ -588,21 +614,21 @@ async def create_scope(body: ScopeCreate, ctx: CtxDep, db: DbDep) -> dict:
         raise err(404, "ASSIGNMENT_NOT_FOUND", "Role assignment not found.", "role_assignment_id")
     if not await _can_scope(db, ctx, ra):
         raise err(403, "SCOPE_FORBIDDEN", "Only the role holder, governance roles or administrators can scope an assignment.")
-    if body.scope_type == "organization":
-        if body.crm_org_id is None or body.project_id is not None:
-            raise err(422, "SCOPE_INVALID", "An organization scope needs crm_org_id only.", "crm_org_id")
-        await _org(db, ctx, body.crm_org_id)
-    else:
-        if body.project_id is None or body.crm_org_id is not None:
-            raise err(422, "SCOPE_INVALID", "A project scope needs project_id only.", "project_id")
-        proj = await q1(db, "SELECT 1 AS ok FROM projects WHERE id = :p AND organization_id = :o AND deleted_at IS NULL", p=body.project_id, o=ctx.org_id)
-        if proj is None:
-            raise err(404, "PROJECT_NOT_FOUND", "Project not found.", "project_id")
+    given = {
+        "organization": body.crm_org_id, "project": body.project_id, "opportunity": body.opportunity_id, "proposal": body.proposal_id, "contract": body.contract_id,
+    }
+    filled = {k for k, v in given.items() if v is not None}
+    if filled != {body.scope_type}:
+        raise err(422, "SCOPE_INVALID", f"A {body.scope_type} scope needs its own id and no other target.", "scope_type")
+    table, code, message = SCOPE_TABLES[body.scope_type]
+    exists = await q1(db, f"SELECT 1 AS ok FROM {table} WHERE id = :i AND organization_id = :o AND deleted_at IS NULL", i=given[body.scope_type], o=ctx.org_id)  # noqa: S608 - table from a constant map
+    if exists is None:
+        raise err(404, code, message)
     row = await q1(
         db,
-        """INSERT INTO crm_role_scopes (organization_id, role_assignment_id, scope_type, crm_org_id, project_id, created_by) VALUES (:o, :ra, :t, :c, :p, :u)
-           ON CONFLICT DO NOTHING RETURNING id""",
-        o=ctx.org_id, ra=body.role_assignment_id, t=body.scope_type, c=body.crm_org_id, p=body.project_id, u=ctx.user_id,
+        """INSERT INTO crm_role_scopes (organization_id, role_assignment_id, scope_type, crm_org_id, project_id, opportunity_id, proposal_id, contract_id, created_by)
+           VALUES (:o, :ra, :t, :c, :p, :op, :pr, :ct, :u) ON CONFLICT DO NOTHING RETURNING id""",
+        o=ctx.org_id, ra=body.role_assignment_id, t=body.scope_type, c=body.crm_org_id, p=body.project_id, op=body.opportunity_id, pr=body.proposal_id, ct=body.contract_id, u=ctx.user_id,
     )
     await audit(db, ctx, "crm.role_scoped", "role_assignment", body.role_assignment_id, f"{body.scope_type} scope added")
     await db.commit()
