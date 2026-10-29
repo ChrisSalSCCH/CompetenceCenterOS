@@ -27,7 +27,7 @@ async def search(
     types: str | None = Query(default=None, max_length=200),
 ) -> dict:
     wanted = {t.strip() for t in types.split(",") if t.strip()} if types else None
-    results = await search_all(db, ctx.org_id, q_, wanted)
+    results = await search_all(db, ctx.org_id, q_, wanted, observer=ctx.level == "observer")
     return {"query": q_, "results": results}
 
 

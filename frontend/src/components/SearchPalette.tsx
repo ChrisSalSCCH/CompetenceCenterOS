@@ -10,6 +10,7 @@ import { Pill } from '@/components/kit'
 
 const TYPE_LABEL: Record<string, string> = {
   circle: 'Circle', role: 'Role', person: 'Person', proposal: 'Proposal', project: 'Project', task: 'Task', meeting: 'Meeting', tension: 'Tension',
+  customer: 'Customer', contact: 'Contacts', catalog: 'Technology',
 }
 
 export function SearchPalette({ open, onOpenChange }: Readonly<{ open: boolean; onOpenChange: (v: boolean) => void }>) {

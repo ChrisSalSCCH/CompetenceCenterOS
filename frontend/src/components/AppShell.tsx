@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import {
-  Bell, CalendarDays, Languages, LayoutDashboard, LogOut, Menu, Moon, Network, Scale, Search, Settings2, Sparkles, Sun, Target, UserCircle2, Users, KanbanSquare,
+  Bell, Briefcase, Building2, CalendarDays, ChevronDown, Languages, LayoutDashboard, LogOut, Menu, Moon, Network, Scale, Search, Settings2, Sparkles, Sun, Target, UserCircle2, Users, KanbanSquare,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
@@ -28,12 +28,20 @@ export function LogoMark({ className }: Readonly<{ className?: string }>) {
   )
 }
 
+interface NavChild {
+  to: string
+  label: string
+  end?: boolean
+  planned?: boolean
+}
+
 interface NavDef {
   to: string
   label: string
   icon: typeof Network
   admin?: boolean
   end?: boolean
+  children?: NavChild[]
 }
 
 const NAV: NavDef[] = [
@@ -44,38 +52,108 @@ const NAV: NavDef[] = [
   { to: '/governance', label: 'Governance', icon: Scale },
   { to: '/meetings', label: 'Meetings', icon: CalendarDays },
   { to: '/work', label: 'Projects & Tasks', icon: KanbanSquare },
+  {
+    to: '/projects',
+    label: 'Project Portfolio',
+    icon: Briefcase,
+    children: [
+      { to: '/projects', label: 'Portfolio', end: true },
+      { to: '/projects/customer', label: 'Customer Projects' },
+      { to: '/projects/internal', label: 'Internal Projects' },
+      { to: '/projects/knowledge', label: 'Project Knowledge' },
+      { to: '/projects/catalog', label: 'Technologies & Competencies' },
+      { to: '/projects/references', label: 'References' },
+    ],
+  },
+  {
+    to: '/crm',
+    label: 'CRM',
+    icon: Building2,
+    children: [
+      { to: '/crm', label: 'Dashboard', end: true },
+      { to: '/crm/organizations', label: 'Companies' },
+      { to: '/crm/contacts', label: 'Contacts' },
+      { to: '/crm/opportunities', label: 'Opportunities', planned: true },
+      { to: '/crm/quotes', label: 'Quotes', planned: true },
+      { to: '/crm/contracts', label: 'NDAs & Contracts', planned: true },
+      { to: '/crm/relationships', label: 'Customer Relationships' },
+    ],
+  },
   { to: '/goals', label: 'Goals & Metrics', icon: Target },
   { to: '/assistant', label: 'AI Assistant', icon: Sparkles },
   { to: '/admin', label: 'Administration', icon: Settings2, admin: true },
 ]
+
+const LINK_BASE = 'group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring'
+
+function NavGroup({ item, onNavigate }: Readonly<{ item: NavDef; onNavigate?: () => void }>) {
+  const { t } = useT()
+  const location = useLocation()
+  const inside = location.pathname === item.to || location.pathname.startsWith(`${item.to}/`)
+  const [open, setOpen] = useState(inside)
+  useEffect(() => {
+    if (inside) setOpen(true)
+  }, [inside])
+  const panelId = `nav-group-${item.to.replaceAll('/', '')}`
+  return (
+    <div>
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((v) => !v)}
+        className={cn(LINK_BASE, 'w-full text-left', inside && 'text-sidebar-accent-foreground')}
+      >
+        <item.icon className="h-4 w-4 shrink-0" aria-hidden />
+        <span className="flex-1">{t(item.label)}</span>
+        <ChevronDown className={cn('h-4 w-4 shrink-0 transition-transform', open && 'rotate-180')} aria-hidden />
+      </button>
+      {open && (
+        <div id={panelId} className="ml-4 mt-0.5 flex flex-col gap-0.5 border-l border-sidebar-foreground/15 pl-2">
+          {item.children?.map((c) => (
+            <NavLink
+              key={c.to}
+              to={c.to}
+              end={c.end}
+              onClick={onNavigate}
+              className={({ isActive }) => cn(LINK_BASE, 'py-1.5 text-[13px]', isActive && 'bg-sidebar-accent text-sidebar-accent-foreground')}
+            >
+              <span className="flex-1">{t(c.label)}</span>
+              {c.planned && <span className="rounded-full border border-sidebar-foreground/25 px-1.5 text-[10px] leading-4 text-sidebar-foreground/60">{t('Planned')}</span>}
+            </NavLink>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function NavList({ onNavigate }: Readonly<{ onNavigate?: () => void }>) {
   const { t } = useT()
   const { isAdmin } = useSession()
   return (
     <nav aria-label={t('Main navigation')} className="flex flex-col gap-0.5">
-      {NAV.filter((n) => !n.admin || isAdmin).map((n) => (
-        <NavLink
-          key={n.to}
-          to={n.to}
-          end={n.end}
-          onClick={onNavigate}
-          className={({ isActive }) =>
-            cn(
-              'group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring',
-              isActive && 'bg-sidebar-accent text-sidebar-accent-foreground',
-            )
-          }
-        >
-          {({ isActive }) => (
-            <>
-              <span className={cn('absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-sidebar-primary transition-opacity', isActive ? 'opacity-100' : 'opacity-0')} />
-              <n.icon className="h-4 w-4 shrink-0" aria-hidden />
-              {t(n.label)}
-            </>
-          )}
-        </NavLink>
-      ))}
+      {NAV.filter((n) => !n.admin || isAdmin).map((n) =>
+        n.children ? (
+          <NavGroup key={n.to} item={n} onNavigate={onNavigate} />
+        ) : (
+          <NavLink
+            key={n.to}
+            to={n.to}
+            end={n.end}
+            onClick={onNavigate}
+            className={({ isActive }) => cn(LINK_BASE, isActive && 'bg-sidebar-accent text-sidebar-accent-foreground')}
+          >
+            {({ isActive }) => (
+              <>
+                <span className={cn('absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-sidebar-primary transition-opacity', isActive ? 'opacity-100' : 'opacity-0')} />
+                <n.icon className="h-4 w-4 shrink-0" aria-hidden />
+                {t(n.label)}
+              </>
+            )}
+          </NavLink>
+        ),
+      )}
     </nav>
   )
 }

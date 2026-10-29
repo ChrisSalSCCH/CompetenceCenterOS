@@ -130,8 +130,11 @@ async def lifespan(app: FastAPI):
             logger.info("Database migrations applied successfully")
             # Demonstration organization: only created while the database has no organization.
             from services.seed import seed_if_empty
+            from services.seed_portfolio import seed_portfolio_if_missing
 
             await seed_if_empty()
+            # Demo organizations created before the portfolio/CRM modules get their sample data once.
+            await seed_portfolio_if_missing()
 
     yield
     logger.info("Shutdown complete")

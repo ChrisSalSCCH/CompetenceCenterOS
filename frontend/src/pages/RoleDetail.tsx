@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, EmptyState, ErrorBlock, ItemList, LoadingBlock, ModePill, PageHeader, Pill, PriorityPill, Section, StatusPill } from '@/components/kit'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { RoleScopesSection } from '@/components/crm/RoleScopesSection'
 import { HistoryTimeline } from '@/components/HistoryTimeline'
 import { RoleFormDialog, useSubmitFeedback } from '@/components/StructureForms'
 import { useSession } from '@/contexts/SessionContext'
@@ -228,6 +229,8 @@ export default function RoleDetail() {
               </ul>
             )}
           </Section>
+
+          {id && <RoleScopesSection roleId={id} />}
 
           {data.tensions.length > 0 && (
             <Section title={t('Open tensions')} index={6}>

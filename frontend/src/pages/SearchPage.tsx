@@ -19,8 +19,8 @@ interface RoleHit {
   score: number
 }
 
-const ORDER = ['role', 'circle', 'person', 'proposal', 'project', 'task', 'meeting', 'tension']
-const LABEL: Record<string, string> = { role: 'Roles', circle: 'Circles', person: 'People', proposal: 'Proposals', project: 'Projects', task: 'Tasks', meeting: 'Meetings', tension: 'Tensions' }
+const ORDER = ['role', 'circle', 'person', 'proposal', 'project', 'customer', 'contact', 'catalog', 'task', 'meeting', 'tension']
+const LABEL: Record<string, string> = { role: 'Roles', circle: 'Circles', person: 'People', proposal: 'Proposals', project: 'Projects', customer: 'Companies', contact: 'Contacts', catalog: 'Technologies & Competencies', task: 'Tasks', meeting: 'Meetings', tension: 'Tensions' }
 
 export default function SearchPage() {
   const { t } = useT()

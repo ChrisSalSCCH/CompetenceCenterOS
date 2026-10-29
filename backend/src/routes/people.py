@@ -168,7 +168,26 @@ async def dashboard(ctx: CtxDep, db: DbDep) -> dict:
              (SELECT COUNT(*) FROM tasks WHERE assignee_id = :u AND organization_id = :o AND deleted_at IS NULL AND status <> 'done' AND due_date < CURRENT_DATE) AS overdue_tasks""",
         u=ctx.user_id, o=ctx.org_id,
     )
+    portfolio = await q1(
+        db,
+        """SELECT
+             (SELECT COUNT(*) FROM projects WHERE organization_id = :o AND deleted_at IS NULL AND status IN ('planned','active')) AS active_projects,
+             (SELECT COUNT(*) FROM projects WHERE organization_id = :o AND deleted_at IS NULL AND status IN ('planned','active') AND classification = 'customer') AS active_customer_projects,
+             (SELECT COUNT(*) FROM crm_organizations WHERE organization_id = :o AND deleted_at IS NULL AND status = 'active' AND 'customer' = ANY(relation_types)) AS customers,
+             (SELECT COUNT(*) FROM project_communication pc JOIN projects p ON p.id = pc.project_id AND p.deleted_at IS NULL WHERE pc.organization_id = :o AND pc.reference_allowed) AS references""",
+        o=ctx.org_id,
+    )
+    my_scopes = await q(
+        db,
+        """SELECT s.id, s.scope_type, r.name AS role_name, co.id AS crm_org_id, co.name AS org_name, p.id AS project_id, p.name AS project_name
+           FROM crm_role_scopes s JOIN role_assignments ra ON ra.id = s.role_assignment_id AND ra.deleted_at IS NULL AND ra.user_id = :u
+           JOIN roles r ON r.id = ra.role_id AND r.deleted_at IS NULL LEFT JOIN crm_organizations co ON co.id = s.crm_org_id AND co.deleted_at IS NULL
+           LEFT JOIN projects p ON p.id = s.project_id AND p.deleted_at IS NULL WHERE s.organization_id = :o ORDER BY r.name LIMIT 12""",
+        u=ctx.user_id, o=ctx.org_id,
+    )
     return {
+        "portfolio": portfolio,
+        "my_scopes": my_scopes,
         "roles": roles,
         "tasks": tasks,
         "meetings": meetings,

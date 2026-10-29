@@ -18,6 +18,8 @@ interface DashboardData {
   proposals: { id: string; title: string; status: string; workflow: string; circle_name: string; action: 'decide' | 'finish_draft' | 'follow' }[]
   circle_updates: HistoryEntry[]
   counts: { open_tasks: number; overdue_tasks: number }
+  portfolio: { active_projects: number; active_customer_projects: number; customers: number; references: number } | null
+  my_scopes: { id: string; scope_type: 'organization' | 'project'; role_name: string; crm_org_id: string | null; org_name: string | null; project_id: string | null; project_name: string | null }[]
 }
 
 export default function Dashboard() {
@@ -65,6 +67,25 @@ export default function Dashboard() {
             <Stat label={t('Overdue')} value={data.counts.overdue_tasks} tone={data.counts.overdue_tasks > 0 ? 'danger' : undefined} />
             <Stat label={t('Needs my decision')} value={data.proposals.filter((p) => p.action === 'decide').length} tone="primary" />
           </div>
+
+          {data.portfolio && (
+            <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+              <Link to="/projects" className="block"><Stat label={t('Project Portfolio')} value={data.portfolio.active_projects} /></Link>
+              <Link to="/projects/customer" className="block"><Stat label={t('Customer projects')} value={data.portfolio.active_customer_projects} /></Link>
+              <Link to="/crm/organizations" className="block"><Stat label={t('Active customers')} value={data.portfolio.customers} /></Link>
+              <Link to="/projects/references" className="block"><Stat label={t('References')} value={data.portfolio.references} /></Link>
+            </div>
+          )}
+          {data.my_scopes.length > 0 && (
+            <div className="mb-6 flex flex-wrap items-center gap-2 text-sm">
+              <span className="font-mono-label text-muted-foreground">{t('Key accounts')}</span>
+              {data.my_scopes.map((s) => (
+                <Link key={s.id} to={s.crm_org_id ? `/crm/organizations/${s.crm_org_id}` : `/projects/${s.project_id}`} className="rounded-full border px-2.5 py-0.5 hover:border-primary">
+                  {s.org_name ?? s.project_name} <span className="text-xs text-muted-foreground">· {s.role_name}</span>
+                </Link>
+              ))}
+            </div>
+          )}
 
           <div className="grid gap-4 lg:grid-cols-3">
             <Section title={t('My tasks')} index={2} className="lg:col-span-2" action={<Link className="text-xs text-primary hover:underline" to="/work?scope=mine">{t('All tasks')}</Link>}>

@@ -13,13 +13,15 @@ Die gewünschte Kombination Angular, .NET und PrimeNG ist in dieser Umgebung nic
 
 ## Backend-Module (`backend/src`)
 
-- `routes/` – dünne HTTP-Schicht: `session`, `structure`, `governance`, `meetings`, `work`, `goals`, `people`, `search`, `ai`, `admin`.
+- `routes/` – dünne HTTP-Schicht: `session`, `structure`, `governance`, `meetings`, `work`, `goals`, `people`, `search`, `ai`, `admin`, `portfolio`, `catalog`, `crm` (siehe `portfolio-crm.md`).
 - `services/ctx.py` – Mandant, Rolle des Aufrufers und Berechtigungsregeln. Jede Abfrage trägt `organization_id`.
 - `services/governance.py` – Governance-Engine: Änderungsoperationen, Workflow-Regeln, Snapshots.
 - `services/orgdata.py` – Lesemodelle der Struktur (aktuell und zu einem Stichtag).
 - `services/search.py`, `services/analysis.py` – deterministische Suche, Überschneidungserkennung.
 - `services/assistant.py`, `services/llm.py`, `services/secrets.py` – Circle Intelligence und anbieterunabhängige LLM-Schicht.
 - `services/seed.py` – Demonstrationsorganisation (nur bei leerer Datenbank; per Admin zurücksetzbar).
+- `services/portfolio.py`, `services/catalog.py` – reine Regeln (Finanzkennzahlen, Referenzfreigabe, Prüfrechte, Namensnormalisierung, Katalog-Zusammenführung).
+- `services/seed_portfolio.py` – fiktive Portfolio- und CRM-Daten, nur für die Demo-Organisation und nur einmalig.
 
 ## Berechtigungsmodell
 

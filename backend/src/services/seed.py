@@ -16,6 +16,7 @@ from services.auth import hash_password
 from services.ctx import Ctx
 from services.dbx import jb, q1, x
 from services.governance import _replace_items, circle_snapshot, record_change, role_snapshot
+from services.seed_portfolio import seed_portfolio
 
 logger = logging.getLogger(__name__)
 
@@ -461,4 +462,5 @@ async def seed_demo(db) -> UUID:  # noqa: PLR0915 - one linear data script
         await x(db, "INSERT INTO notifications (organization_id, user_id, kind, title, link) VALUES (:o, :u, :k, :t, :l)", o=org, u=uid[person], k=kind, t=title, l=link)
     for action, summary in [("demo.seeded", "Demonstration data created"), ("proposal.created", "Create role Service Level Analyst"), ("proposal.rejected", "Merge Quality Steward into Service Operations Lead")]:
         await x(db, "INSERT INTO audit_events (organization_id, actor_id, action, entity_type, summary) VALUES (:o, :u, :a, 'organization', :s)", o=org, u=uid["anna"], a=action, s=summary)
+    await seed_portfolio(db, org)
     return org

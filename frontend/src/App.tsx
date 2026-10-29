@@ -27,6 +27,17 @@ import Goals from '@/pages/Goals'
 import Assistant from '@/pages/Assistant'
 import Admin from '@/pages/Admin'
 import SearchPage from '@/pages/SearchPage'
+import Portfolio from '@/pages/Portfolio'
+import ProjectDetail from '@/pages/ProjectDetail'
+import ProjectKnowledge from '@/pages/ProjectKnowledge'
+import Catalog from '@/pages/Catalog'
+import References from '@/pages/References'
+import CrmDashboard from '@/pages/crm/CrmDashboard'
+import CrmOrganizations from '@/pages/crm/CrmOrganizations'
+import CrmOrganizationDetail from '@/pages/crm/CrmOrganizationDetail'
+import CrmContacts from '@/pages/crm/CrmContacts'
+import CrmRelationships from '@/pages/crm/CrmRelationships'
+import CrmPlanned from '@/pages/crm/CrmPlanned'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,6 +74,21 @@ function Gate() {
         <Route path="meetings" element={<Meetings />} />
         <Route path="meetings/:id" element={<MeetingDetail />} />
         <Route path="work" element={<Work />} />
+        <Route path="projects" element={<Portfolio />} />
+        <Route path="projects/customer" element={<Portfolio fixed="customer" />} />
+        <Route path="projects/internal" element={<Portfolio fixed="internal" />} />
+        <Route path="projects/knowledge" element={<ProjectKnowledge />} />
+        <Route path="projects/catalog" element={<Catalog />} />
+        <Route path="projects/references" element={<References />} />
+        <Route path="projects/:id" element={<ProjectDetail />} />
+        <Route path="crm" element={<CrmDashboard />} />
+        <Route path="crm/organizations" element={<CrmOrganizations />} />
+        <Route path="crm/organizations/:id" element={<CrmOrganizationDetail />} />
+        <Route path="crm/contacts" element={<CrmContacts />} />
+        <Route path="crm/relationships" element={<CrmRelationships />} />
+        <Route path="crm/opportunities" element={<CrmPlanned module="opportunities" />} />
+        <Route path="crm/quotes" element={<CrmPlanned module="quotes" />} />
+        <Route path="crm/contracts" element={<CrmPlanned module="contracts" />} />
         <Route path="goals" element={<Goals />} />
         <Route path="assistant" element={<Assistant />} />
         <Route path="admin" element={<Admin />} />
