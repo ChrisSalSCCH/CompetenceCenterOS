@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router'
 import {
-  Bell, Briefcase, Building2, CalendarDays, ChevronDown, Languages, LayoutDashboard, Handshake, LogOut, Menu, Moon, Network, Scale, Search, Settings2, Sparkles, Sun, Target, UserCircle2, Users, KanbanSquare,
+  Bell, Briefcase, Building2, CalendarDays, ChevronDown, Gauge, Languages, LayoutDashboard, Handshake, LogOut, Menu, Moon, Network, Scale, Search, Settings2, Sparkles, Sun, Target, UserCircle2, Users, KanbanSquare,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '@/contexts/AuthContext'
@@ -86,6 +86,17 @@ const NAV: NavDef[] = [
       { to: '/sales/ndas', label: 'NDAs' },
       { to: '/sales/contracts', label: 'Contracts' },
       { to: '/sales/settings', label: 'Sales settings' },
+    ],
+  },
+  {
+    to: '/management',
+    label: 'Management',
+    icon: Gauge,
+    children: [
+      { to: '/management', label: 'Cockpit', end: true },
+      { to: '/management/forecast', label: 'Forecast' },
+      { to: '/management/analytics', label: 'Analytics' },
+      { to: '/management/data-quality', label: 'Data quality' },
     ],
   },
   { to: '/goals', label: 'Goals & Metrics', icon: Target },

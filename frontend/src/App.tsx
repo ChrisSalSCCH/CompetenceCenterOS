@@ -40,10 +40,14 @@ import CrmRelationships from '@/pages/crm/CrmRelationships'
 import SalesPipeline from '@/pages/sales/SalesPipeline'
 import OpportunityDetail from '@/pages/sales/OpportunityDetail'
 import ProposalsList from '@/pages/sales/ProposalsList'
-import ProposalDetail from '@/pages/sales/ProposalDetail'
+import SalesProposalDetail from '@/pages/sales/ProposalDetail'
 import { NdaDetail, NdaList } from '@/pages/sales/NdaPages'
 import { ContractDetail, ContractList } from '@/pages/sales/ContractPages'
 import SalesSettings from '@/pages/sales/SalesSettings'
+import Cockpit from '@/pages/management/Cockpit'
+import Forecast from '@/pages/management/Forecast'
+import Analytics from '@/pages/management/Analytics'
+import DataQuality from '@/pages/management/DataQuality'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -98,12 +102,16 @@ function Gate() {
         <Route path="sales" element={<SalesPipeline />} />
         <Route path="sales/opportunities/:id" element={<OpportunityDetail />} />
         <Route path="sales/proposals" element={<ProposalsList />} />
-        <Route path="sales/proposals/:id" element={<ProposalDetail />} />
+        <Route path="sales/proposals/:id" element={<SalesProposalDetail />} />
         <Route path="sales/ndas" element={<NdaList />} />
         <Route path="sales/ndas/:id" element={<NdaDetail />} />
         <Route path="sales/contracts" element={<ContractList />} />
         <Route path="sales/contracts/:id" element={<ContractDetail />} />
         <Route path="sales/settings" element={<SalesSettings />} />
+        <Route path="management" element={<Cockpit />} />
+        <Route path="management/forecast" element={<Forecast />} />
+        <Route path="management/analytics" element={<Analytics />} />
+        <Route path="management/data-quality" element={<DataQuality />} />
         <Route path="goals" element={<Goals />} />
         <Route path="assistant" element={<Assistant />} />
         <Route path="admin" element={<Admin />} />
