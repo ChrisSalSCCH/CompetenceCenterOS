@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeAll, describe, expect, it } from 'vitest'
 import App from '@/App'
 
@@ -19,5 +19,13 @@ describe('App', () => {
     render(<App />)
     expect(await screen.findByRole('button', { name: /sign in|anmelden/i })).toBeInTheDocument()
     expect(screen.getByLabelText(/email|e-mail/i)).toBeInTheDocument()
+  })
+
+  it('explains missing input instead of submitting', async () => {
+    localStorage.clear()
+    render(<App />)
+    fireEvent.click(await screen.findByRole('button', { name: /sign in|anmelden/i }))
+    expect(await screen.findByText(/enter your email address|E-Mail-Adresse ein/i)).toBeInTheDocument()
+    expect(screen.getByText(/enter your password|Passwort ein/i)).toBeInTheDocument()
   })
 })

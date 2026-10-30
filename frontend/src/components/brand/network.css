@@ -1,0 +1,96 @@
+/* scch/kernel network graphic. Only transforms and opacity are animated, so the work stays on the compositor. */
+
+.kn-net {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.kn-hero {
+  -webkit-mask-image: radial-gradient(130% 110% at 68% 38%, #000 52%, transparent 100%);
+  mask-image: radial-gradient(130% 110% at 68% 38%, #000 52%, transparent 100%);
+}
+
+/* Three depth layers drift at different speeds. */
+.kn-layer {
+  will-change: transform;
+}
+.kn-layer-far {
+  animation: kn-drift-a 90s ease-in-out infinite alternate;
+}
+.kn-layer-mid {
+  animation: kn-drift-b 64s ease-in-out infinite alternate;
+}
+.kn-layer-near {
+  animation: kn-drift-c 48s ease-in-out infinite alternate;
+}
+
+@keyframes kn-drift-a {
+  from { transform: translate3d(-8px, 5px, 0); }
+  to { transform: translate3d(8px, -6px, 0); }
+}
+@keyframes kn-drift-b {
+  from { transform: translate3d(10px, -6px, 0); }
+  to { transform: translate3d(-12px, 8px, 0); }
+}
+@keyframes kn-drift-c {
+  from { transform: translate3d(-14px, -8px, 0); }
+  to { transform: translate3d(16px, 10px, 0); }
+}
+
+/* Selected connections breathe. */
+.kn-pulse {
+  opacity: 0.04;
+  animation: kn-pulse var(--dur, 7s) ease-in-out var(--delay, 0s) infinite;
+}
+@keyframes kn-pulse {
+  0%, 100% { opacity: 0.04; }
+  50% { opacity: 0.5; }
+}
+
+/* A short green highlight travels along an edge, then rests. */
+.kn-travel {
+  stroke-dasharray: 9 91;
+  stroke-dashoffset: 9;
+  opacity: 0;
+  animation: kn-travel var(--dur, 12s) cubic-bezier(0.4, 0, 0.2, 1) var(--delay, 0s) infinite;
+}
+@keyframes kn-travel {
+  0% { stroke-dashoffset: 9; opacity: 0; }
+  4% { opacity: 1; }
+  30% { stroke-dashoffset: -100; opacity: 1; }
+  34% { stroke-dashoffset: -100; opacity: 0; }
+  100% { stroke-dashoffset: -100; opacity: 0; }
+}
+
+/* Soft ring around selected green nodes. */
+.kn-halo {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: kn-halo var(--dur, 6s) ease-out var(--delay, 0s) infinite;
+}
+@keyframes kn-halo {
+  0% { transform: scale(1); opacity: 0.5; }
+  70%, 100% { transform: scale(4.2); opacity: 0; }
+}
+
+.kn-static .kn-layer {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kn-layer,
+  .kn-pulse,
+  .kn-travel,
+  .kn-halo {
+    animation: none;
+  }
+  .kn-travel,
+  .kn-halo {
+    display: none;
+  }
+  .kn-pulse {
+    opacity: 0.18;
+  }
+}

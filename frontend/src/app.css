@@ -171,6 +171,25 @@ body {
   }
 }
 
+/* scch/kernel sign-in form: always a clean white surface with SCCH petrol, regardless of the app theme. */
+.kernel-login-form {
+  --background: 0 0% 100%;
+  --foreground: 192 40% 7%;
+  --card: 0 0% 100%;
+  --card-foreground: 192 40% 7%;
+  --primary: 191 95% 17%;
+  --primary-foreground: 0 0% 100%;
+  --muted: 190 20% 95%;
+  --muted-foreground: 192 14% 33%;
+  --border: 190 16% 86%;
+  --input: 192 14% 62%;
+  --ring: 191 95% 17%;
+  --destructive: 4 72% 38%;
+  color-scheme: light;
+  background: #ffffff;
+  color: hsl(var(--foreground));
+}
+
 ::selection {
   background: hsl(var(--primary) / 0.25);
 }
