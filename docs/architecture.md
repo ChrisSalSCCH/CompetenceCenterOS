@@ -1,8 +1,8 @@
-# Architektur von CircleOS
+# Architektur von scch/kernel
 
 ## Technologie
 
-Die gewünschte Kombination Angular, .NET und PrimeNG ist in dieser Umgebung nicht zuverlässig erzeugbar. CircleOS nutzt deshalb den unterstützten Stack und behält die Architektur, die Domänengrenzen und die Containerisierung bei:
+Die gewünschte Kombination Angular, .NET und PrimeNG ist in dieser Umgebung nicht zuverlässig erzeugbar. scch/kernel nutzt deshalb den unterstützten Stack und behält die Architektur, die Domänengrenzen und die Containerisierung bei:
 
 | Schicht | Umsetzung |
 |---------|-----------|

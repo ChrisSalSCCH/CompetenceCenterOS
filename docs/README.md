@@ -1,4 +1,4 @@
-# Dokumentation – CircleOS
+# Dokumentation – scch/kernel
 
 | Datei | Inhalt |
 |-------|--------|

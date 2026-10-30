@@ -21,7 +21,7 @@ export function KernelWordmark({ className, markClassName }: Readonly<{ classNam
     <span className="inline-flex items-center gap-2.5 text-white">
       <KernelMark className={cn('h-8 w-8', markClassName)} />
       <span className={cn('text-2xl font-semibold tracking-tight', className)}>
-        scch<span className="text-[#01F000]">/</span>kernel
+        scch/kernel
       </span>
     </span>
   )

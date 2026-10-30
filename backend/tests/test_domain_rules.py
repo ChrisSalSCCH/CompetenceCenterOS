@@ -1,4 +1,4 @@
-"""Hermetic unit tests for CircleOS domain rules (no database, no network)."""
+"""Hermetic unit tests for scch/kernel domain rules (no database, no network)."""
 
 from __future__ import annotations
 

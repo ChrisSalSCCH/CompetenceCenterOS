@@ -14,19 +14,10 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/ui/sheet'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { KernelMark } from '@/components/brand/KernelBrand'
 import { SearchPalette } from '@/components/SearchPalette'
 import { ProfileDialog } from '@/components/ProfileDialog'
 import { cn } from '@/lib/utils'
-
-export function LogoMark({ className }: Readonly<{ className?: string }>) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-hidden>
-      <circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" strokeWidth="2" />
-      <circle cx="11" cy="14" r="5" fill="hsl(16 63% 52%)" />
-      <circle cx="21" cy="18" r="4" fill="currentColor" opacity="0.85" />
-    </svg>
-  )
-}
 
 interface NavChild {
   to: string
@@ -183,8 +174,8 @@ function Brand() {
   return (
     <div className="px-3">
       <div className="flex items-center gap-2 text-sidebar-foreground">
-        <LogoMark className="h-8 w-8" />
-        <span className="font-display text-2xl font-semibold tracking-tight">CircleOS</span>
+        <KernelMark className="h-8 w-8" />
+        <span className="text-xl font-semibold tracking-tight">scch/kernel</span>
       </div>
       <p className="mt-1 truncate text-xs text-sidebar-foreground/60">{session?.organization.name}</p>
     </div>

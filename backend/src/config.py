@@ -25,7 +25,7 @@ class Settings:
     # suffix, so it is usable anywhere the app names itself: emails, page titles,
     # PDF headers, log context. The API docs append their own suffix (see
     # main.py), which is why this must NOT carry "API" itself.
-    app_name: str = field(default_factory=lambda: os.getenv("APP_NAME", "CircleOS"))
+    app_name: str = field(default_factory=lambda: os.getenv("APP_NAME", "scch/kernel"))
     environment: str = field(
         default_factory=lambda: os.getenv("ENVIRONMENT", "local")
     )  # local | dev | staging | prod

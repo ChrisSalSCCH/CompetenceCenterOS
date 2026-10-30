@@ -1,4 +1,4 @@
-/* CircleOS theme: warm paper, ink, terracotta. Overrides the shadcn tokens from index.css. */
+/* scch/kernel theme: warm paper, ink, terracotta. Overrides the shadcn tokens from index.css. */
 
 :root {
   --font-display: 'Newsreader', Georgia, serif;
